@@ -174,3 +174,37 @@ def test_id_type_and_context():
         '@type': 'FooType',
         '@context': {'term': 'definition'},
     }
+
+
+def test_explicit_overrides():
+    config = morepath.setup()
+    config.scan(more.jsonld)
+
+    class app(JsonldApp):
+        testing_config = config
+
+    class Foo(object):
+        def __init__(self, id):
+            self.id = id
+
+    @app.path(path='/foos/{id}', model=Foo)
+    def get_foo(id):
+        return Foo(id)
+
+    @app.jsonld(model=Foo)
+    def foo_default(self, request):
+        return {'some': 'value',
+                '@id': self.id}
+
+    @app.ld_id(model=Foo)
+    def foo_id(self, request):
+        assert False, "Should not be called"
+
+    config.commit()
+
+    c = Client(app())
+    r = c.get('/foos/10')
+    assert r.json == {
+        'some': 'value',
+        '@id': '10'
+    }
