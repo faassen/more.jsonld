@@ -77,7 +77,7 @@ def test_type():
         pass
 
     @app.path(path='/', model=Foo)
-    def get_foo(id):
+    def get_foo():
         return Foo()
 
     @app.jsonld(model=Foo)
@@ -110,7 +110,7 @@ def test_context():
         pass
 
     @app.path(path='/', model=Foo)
-    def get_foo(id):
+    def get_foo():
         return Foo()
 
     @app.jsonld(model=Foo)
@@ -128,5 +128,49 @@ def test_context():
 
     assert r.json == {
         'some': 'value',
+        '@context': {'term': 'definition'},
+    }
+
+
+def test_id_type_and_context():
+    config = morepath.setup()
+    config.scan(more.jsonld)
+
+    class app(JsonldApp):
+        testing_config = config
+
+    class Foo(object):
+        def __init__(self, id):
+            self.id = id
+
+    @app.path(path='/foos/10', model=Foo)
+    def get_foo(id):
+        return Foo(id)
+
+    @app.jsonld(model=Foo)
+    def foo_default(self, request):
+        return {'some': 'value'}
+
+    @app.ld_id(model=Foo)
+    def foo_id(self, request):
+        return request.link(self)
+
+    @app.ld_type(model=Foo)
+    def foo_type(self, request):
+        return 'FooType'
+
+    @app.ld_context(model=Foo)
+    def foo_context(self, request):
+        return {'term': 'definition'}
+
+    config.commit()
+
+    c = Client(app())
+    r = c.get('/foos/10')
+
+    assert r.json == {
+        'some': 'value',
+        '@id': '/foos/10',
+        '@type': 'FooType',
         '@context': {'term': 'definition'},
     }
