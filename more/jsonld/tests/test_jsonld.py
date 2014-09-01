@@ -24,13 +24,13 @@ def test_noop():
 
     @app.jsonld(model=Foo)
     def foo_default(self, request):
-        return {}
+        return {'some': 'value'}
 
     config.commit()
 
     c = Client(app())
     r = c.get('/')
-    assert r.json == {}
+    assert r.json == {'some': 'value'}
 
 
 def test_id():
@@ -50,7 +50,7 @@ def test_id():
 
     @app.jsonld(model=Foo)
     def foo_default(self, request):
-        return {}
+        return {'some': 'value'}
 
     @app.ld_id(model=Foo)
     def foo_id(self, request):
@@ -60,4 +60,40 @@ def test_id():
 
     c = Client(app())
     r = c.get('/foos/10')
-    assert r.json == { '@id': '/foos/10' }
+    assert r.json == {
+        'some': 'value',
+        '@id': '/foos/10'
+    }
+
+
+def test_type():
+    config = morepath.setup()
+    config.scan(more.jsonld)
+
+    class app(JsonldApp):
+        testing_config = config
+
+    class Foo(object):
+        pass
+
+    @app.path(path='/', model=Foo)
+    def get_foo(id):
+        return Foo()
+
+    @app.jsonld(model=Foo)
+    def foo_default(self, request):
+        return {'some': 'value'}
+
+    @app.ld_type(model=Foo)
+    def foo_type(self, request):
+        return 'FooType'
+
+    config.commit()
+
+    c = Client(app())
+    r = c.get('/')
+
+    assert r.json == {
+        'some': 'value',
+        '@type': 'FooType'
+    }
