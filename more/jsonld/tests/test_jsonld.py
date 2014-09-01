@@ -97,3 +97,36 @@ def test_type():
         'some': 'value',
         '@type': 'FooType'
     }
+
+
+def test_context():
+    config = morepath.setup()
+    config.scan(more.jsonld)
+
+    class app(JsonldApp):
+        testing_config = config
+
+    class Foo(object):
+        pass
+
+    @app.path(path='/', model=Foo)
+    def get_foo(id):
+        return Foo()
+
+    @app.jsonld(model=Foo)
+    def foo_default(self, request):
+        return {'some': 'value'}
+
+    @app.ld_context(model=Foo)
+    def foo_context(self, request):
+        return {'term': 'definition'}
+
+    config.commit()
+
+    c = Client(app())
+    r = c.get('/')
+
+    assert r.json == {
+        'some': 'value',
+        '@context': {'term': 'definition'},
+    }

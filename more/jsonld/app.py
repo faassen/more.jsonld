@@ -13,6 +13,18 @@ def ld_type(request, self):
     return None
 
 
+@reg.generic
+def ld_context(request, self):
+    return None
+
+
+JSON_LD = {
+    '@id': ld_id,
+    '@type': ld_type,
+    '@context': ld_context
+}
+
+
 class JsonldApp(morepath.App):
     pass
 
@@ -22,14 +34,11 @@ class JsonldDirective(JsonDirective):
     def perform(self, registry, obj):
         def view(self, request):
             result = obj(self, request)
-            if '@id' not in result:
-                id = ld_id(request, self, lookup=request.lookup)
-                if id is not None:
-                    result['@id'] = id
-            if '@type' not in result:
-                type = ld_type(request, self, lookup=request.lookup)
-                if type is not None:
-                    result['@type'] = type
+            for key, value in JSON_LD.items():
+                if key not in result:
+                    v = value(request, self, lookup=request.lookup)
+                    if v is not None:
+                        result[key] = v
             return result
         super(JsonldDirective, self).perform(registry, view)
 
@@ -60,3 +69,9 @@ class LdIdDirective(LdDirective):
 class LdTypeDirective(LdDirective):
     def __init__(self, app, model):
         super(LdTypeDirective, self).__init__(app, model, ld_type)
+
+
+@JsonldApp.directive('ld_context')
+class LdContextDirective(LdDirective):
+    def __init__(self, app, model):
+        super(LdContextDirective, self).__init__(app, model, ld_context)
