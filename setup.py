@@ -22,6 +22,7 @@ setup(name='more.jsonld',
       install_requires=[
         'setuptools',
         'morepath >= 0.4',
+        'pyld >= 0.6.6',
         ],
       extras_require = dict(
         test=['pytest >= 2.0',
