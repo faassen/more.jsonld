@@ -1,0 +1,40 @@
+JSON-LD support in Morepath:
+
+* a way to centralize id, type and context generation (by app, by
+  model class).
+
+* a way to let the user generate really flat output and then frame it
+  into the right structure.
+
+* recompact output with friendlier context? i.e. a notion of a context
+  reference but also a notion of a context to apply. How does this
+  relate to a framing context and a frame, though?
+
+* should a JSON-LD template really be in a file, or should we have
+  a way to indicate the frame in code instead?
+
+* the problem with context: if we reuse a sub-object's JSON-LD rendering,
+  it should include id and type, but not context. Is this related to
+  the difference between serialization with json_dump versus
+  exposing a view?
+
+* could we reimplement this based around json_dump?
+
+* how does JSON-LD framing, possibly with the @link option, relate to
+  jsonvalue, if at all?
+
+* what about *inputting* JSON-LD content?
+
+@App.ld_compact_context()
+
+@App.ld_frame()
+
+the frame to use. normally no frame.
+
+
+something to produce a flat graph so that it can be given air in a frame.
+
+
+
+
+
