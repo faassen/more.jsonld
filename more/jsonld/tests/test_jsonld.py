@@ -62,7 +62,7 @@ def test_id():
     r = c.get('/foos/10')
     assert r.json == {
         'some': 'value',
-        '@id': '/foos/10'
+        '@id': 'http://localhost/foos/10'
     }
 
 
@@ -170,7 +170,7 @@ def test_id_type_and_context():
 
     assert r.json == {
         'some': 'value',
-        '@id': '/foos/10',
+        '@id': 'http://localhost/foos/10',
         '@type': 'FooType',
         '@context': {'term': 'definition'},
     }

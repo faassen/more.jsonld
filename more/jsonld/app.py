@@ -3,18 +3,18 @@ from morepath.directive import JsonDirective
 import reg
 
 
-@reg.generic
-def ld_id(request, self):
+@reg.dispatch('obj')
+def ld_id(request, obj):
     return None
 
 
-@reg.generic
-def ld_type(request, self):
+@reg.dispatch('obj')
+def ld_type(request, obj):
     return None
 
 
-@reg.generic
-def ld_context(request, self):
+@reg.dispatch('obj')
+def ld_context(request, obj):
     return None
 
 
@@ -55,8 +55,8 @@ class LdDirective(morepath.Directive):
     def perform(self, registry, obj):
         def f(request, model):
             return obj(model, request)
-        registry.register(self.generic_func,
-                          [morepath.Request, self.model], f)
+        registry.register_function(self.generic_func, f,
+                                   obj=self.model)
 
 
 @JsonldApp.directive('ld_id')
